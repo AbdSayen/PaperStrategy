@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 861dc58b19f531a4bb8829b0ae649ff9, type: 3}
+  m_Name: TitaniumSource
+  m_EditorClassIdentifier: 
+  moduleName: Ttitanium Source
+  description: 
+  maxHealth: -1
+  size: {x: 2, y: 2}
+  goldCost: 0
+  woodCost: 0
+  oilCost: 0
+  sprite: {fileID: -6937154614026109424, guid: 8a304b4589aa9cf498b9be2e9686c96a, type: 3}
+  prefab: {fileID: 1154115400724727612, guid: a23872a63d500144984f7e4c56df5c16, type: 3}
