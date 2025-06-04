@@ -15,6 +15,7 @@ public class BuildSystem : MonoBehaviour
     [SerializeField] private Color invalidColor = new Color(1, 0, 0, 0.7f);
     [SerializeField] private Color destroyHighlightColor = new Color(1, 0.5f, 0.5f, 0.7f);
 
+    private PhotonView photonView;
     private PostProcessVolume volume;
     private bool isBuildMode = false;
     private bool isDestroyMode = false;
@@ -27,6 +28,7 @@ public class BuildSystem : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        photonView = GetComponent<PhotonView>();
     }
 
     private Vector3 mouseDownPosition;
@@ -75,19 +77,24 @@ public class BuildSystem : MonoBehaviour
             {
                 if (canPlace)
                 {
-                    GameObject newModule = PhotonNetwork.Instantiate(currentModule.prefab.name, gridPosition, Quaternion.identity);
-                    Module moduleComponent = newModule.GetComponent<Module>();
-                    if (moduleComponent != null)
-                    {
-                        moduleComponent.Info = currentModule;
-                        moduleComponent.Initialize(PhotonNetwork.LocalPlayer.UserId);
-                        moduleComponent.AutoSetColor();
-                    }
+                    photonView.RPC("InstantiateRoomObject", RpcTarget.MasterClient, currentModule.prefab.name, gridPosition, Quaternion.identity);
                     PayForBuilding(currentModule);
                 }
                 else
                     CameraEffects.Instance.ShakeCamera(0.075f, 0.2f);
             }
+        }
+    }
+
+    [PunRPC]
+    private void InstantiateRoomObject(string prefabName, Vector3 position, Quaternion rotation)
+    {
+        Module moduleComponent = PhotonNetwork.InstantiateRoomObject(prefabName, position, rotation).GetComponent<Module>();
+        if (moduleComponent != null)
+        {
+            moduleComponent.Info = currentModule;
+            moduleComponent.Initialize(PhotonNetwork.LocalPlayer.UserId);
+            moduleComponent.AutoSetColor();
         }
     }
 

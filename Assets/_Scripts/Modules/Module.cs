@@ -10,7 +10,6 @@ public class Module : MonoBehaviour
     public Color NormalColor { get; private set; } = new();
 
     protected virtual void Awake() { }
-
     protected virtual void Start() => PlayersManager.Instance.OnLocalReady += AutoSetColor;
     private void OnDisable() => PlayersManager.Instance.OnLocalReady -= AutoSetColor;
 
