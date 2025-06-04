@@ -22,6 +22,16 @@ public class ConnectToServer : MonoBehaviourPunCallbacks
         menu.SetActive(false);
     }
 
+    private void OnFailedToConnectToMasterServer()
+    {
+        Awake();
+    }
+
+    private void OnFailedToConnect()
+    {
+        Awake();
+    }
+
     private void Start()
     {
         PhotonNetwork.LocalPlayer.NickName = Random.Range(0, 10000).ToString();

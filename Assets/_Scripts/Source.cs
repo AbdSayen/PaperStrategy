@@ -1,13 +1,23 @@
-using UnityEngine.UI;
+using System.Linq;
+using UnityEngine;
 
 public abstract class Source : Module
 {
     public abstract string MaterialName { get; protected set; }
 
-    private Image displayImage;
-    private void Start()
+    private SpriteRenderer displayImage;
+
+    public override void AutoSetColor()
     {
-        displayImage = GetComponentInChildren<Image>();
-        displayImage.color = normalColor;
+        base.AutoSetColor();
+
+        displayImage = GetComponentsInChildren<SpriteRenderer>(true)  
+            .FirstOrDefault(sr => sr.transform != transform);  
+
+        if (displayImage != null)
+        {
+            displayImage.color = NormalColor;
+            NormalizeColor();
+        }
     }
 }

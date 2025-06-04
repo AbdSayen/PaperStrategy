@@ -5,22 +5,35 @@ public class Module : MonoBehaviour
 {
     public ModuleInfo Info { get; set; }
     public float Health { get; private set; }
-    public int OwnerId { get; set; }
+    public string OwnerId { get; set; } = null;
 
-    public Color normalColor { get; private set; } = new();
+    public Color NormalColor { get; private set; } = new();
 
-    private void Awake()
+    protected virtual void Awake() { }
+
+    protected virtual void Start() => PlayersManager.Instance.OnLocalReady += AutoSetColor;
+    private void OnDisable() => PlayersManager.Instance.OnLocalReady -= AutoSetColor;
+
+    protected void SetColor(Color color)
     {
-        normalColor = GetComponent<SpriteRenderer>().color;
+        GetComponent<SpriteRenderer>().color = color;
     }
 
-    private void Start()
+    protected void SetNormalColor(Color color, bool apply = false)
     {
-        if (GetComponent<PhotonView>().IsMine)
-            OwnerId = int.Parse(PhotonNetwork.LocalPlayer.NickName);
+        NormalColor = color;
+        if (apply) SetColor(NormalColor);
     }
 
-    public void Initialize(int ownerId)
+    public virtual void AutoSetColor()
+    {
+        SetNormalColor(
+            OwnerId != null
+            ? PlayersManager.Instance.GetPlayerData(OwnerId).Color
+            : Color.black, true);
+    }
+
+    public void Initialize(string ownerId)
     {
         OwnerId = ownerId;
         Health = Info.maxHealth;
@@ -28,7 +41,7 @@ public class Module : MonoBehaviour
 
     public void NormalizeColor()
     {
-        GetComponent<SpriteRenderer>().color = normalColor;
+        GetComponent<SpriteRenderer>().color = NormalColor;
     }
 
     public void TakeDamage(int damage) => Health = Mathf.Max(0, Health - damage);

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2174713299547221885}
   m_Layer: 0
   m_Name: Oil
-  m_TagString: Buildable
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -171,7 +171,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06d695680bd023d4d986a24f66e849bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  displayImage: {fileID: 0}
 --- !u!1 &7490111276279218947
 GameObject:
   m_ObjectHideFlags: 0

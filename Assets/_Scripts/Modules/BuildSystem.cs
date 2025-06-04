@@ -80,7 +80,8 @@ public class BuildSystem : MonoBehaviour
                     if (moduleComponent != null)
                     {
                         moduleComponent.Info = currentModule;
-                        moduleComponent.Initialize(int.Parse(PhotonNetwork.LocalPlayer.NickName));
+                        moduleComponent.Initialize(PhotonNetwork.LocalPlayer.UserId);
+                        moduleComponent.AutoSetColor();
                     }
                     PayForBuilding(currentModule);
                 }
@@ -129,7 +130,7 @@ public class BuildSystem : MonoBehaviour
 
             if (renderer != null && module != null)
             {
-                renderer.color = module.normalColor;
+                module.NormalizeColor();
             }
             highlightedObject = null;
         }
@@ -140,11 +141,8 @@ public class BuildSystem : MonoBehaviour
         Module moduleComponent = moduleObject.GetComponent<Module>();
         if (moduleComponent != null && moduleComponent.Info != null)
         {
-            if (moduleComponent.OwnerId != int.Parse(PhotonNetwork.LocalPlayer.NickName))
-            {
-                Debug.Log("Cannot destroy other player's modules");
+            if (moduleComponent.OwnerId != PhotonNetwork.LocalPlayer.UserId)
                 return;
-            }
 
             foreach (var material in moduleComponent.Info.PriceList)
             {
@@ -265,9 +263,6 @@ public class BuildSystem : MonoBehaviour
         isDestroyMode = !isDestroyMode;
         CancelModuleSelection();
         ClearHighlight();
-
-        volume.profile.TryGetSettings(out ColorGrading colorGrading);
-        colorGrading.active = isDestroyMode;
     }
 
     private void Start()

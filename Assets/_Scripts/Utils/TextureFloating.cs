@@ -1,44 +1,27 @@
 using UnityEngine;
-using UnityEngine.UI; 
 
-public class TextureFloating : MonoBehaviour
+public class SpriteFloating : MonoBehaviour
 {
-    [SerializeField] private float xSpeed = 0.15f;
-    [SerializeField] private float ySpeed = 0.15f;
+    [SerializeField] private float xSpeed = 0.5f; 
+    [SerializeField] private float ySpeed = 0.5f;
+    [SerializeField] private float xAmplitude = 1f;
+    [SerializeField] private float yAmplitude = 1f;
 
-    private Image image;
-    private Material material;
-    private Vector2 currentOffset;
+    private Vector2 startPosition;
+    private float timeCounter = 0f;
 
     private void Start()
     {
-        image = GetComponent<Image>();
-
-        if (image == null)
-        {
-            Debug.LogError("No Image component found!", this);
-            enabled = false;
-            return;
-        }
-
-        material = new Material(image.material);
-        image.material = material;
+        startPosition = transform.position;
     }
 
     private void Update()
     {
-        if (material == null) return;
+        timeCounter += Time.deltaTime;
 
-        currentOffset.x += xSpeed * Time.deltaTime;
-        currentOffset.y += ySpeed * Time.deltaTime;
-        material.mainTextureOffset = currentOffset;
-    }
+        float newX = startPosition.x + Mathf.Sin(timeCounter * xSpeed) * xAmplitude;
+        float newY = startPosition.y + Mathf.Cos(timeCounter * ySpeed) * yAmplitude;
 
-    private void OnDestroy()
-    {
-        if (material != null && Application.isPlaying)
-        {
-            Destroy(material);
-        }
+        transform.position = new Vector2(newX, newY);
     }
 }

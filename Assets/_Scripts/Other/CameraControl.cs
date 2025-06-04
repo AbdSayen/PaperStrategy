@@ -25,6 +25,7 @@ public class CameraControl : MonoBehaviour
         {
             HandleMouseInput();
         }
+        transform.position = new(Mathf.Clamp(transform.position.x, -150, 150), Mathf.Clamp(transform.position.y, -150, 150), -10);
     }
 
     private void HandleMouseInput()

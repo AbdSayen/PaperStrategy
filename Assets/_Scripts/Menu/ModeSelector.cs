@@ -18,7 +18,7 @@ public class ModeSelector : MonoBehaviourPunCallbacks
 
     public void JoinRandomRoom()
     {
-        PhotonNetwork.JoinRandomOrCreateRoom(roomOptions: new RoomOptions() { MaxPlayers = 3 });
+        PhotonNetwork.JoinRandomOrCreateRoom(roomOptions: new RoomOptions() { MaxPlayers = 4 });
         DisableButtons();
     }
 
