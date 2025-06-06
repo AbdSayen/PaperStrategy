@@ -77,7 +77,7 @@ public class BuildSystem : MonoBehaviour
             {
                 if (canPlace)
                 {
-                    photonView.RPC("InstantiateRoomObject", RpcTarget.MasterClient, currentModule.prefab.name, gridPosition, Quaternion.identity);
+                    photonView.RPC("InstantiateRoomObject", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.UserId, currentModule.prefab.name, gridPosition, Quaternion.identity);
                     PayForBuilding(currentModule);
                 }
                 else
@@ -87,15 +87,11 @@ public class BuildSystem : MonoBehaviour
     }
 
     [PunRPC]
-    private void InstantiateRoomObject(string prefabName, Vector3 position, Quaternion rotation)
+    private void InstantiateRoomObject(string userId, string prefabName, Vector3 position, Quaternion rotation)
     {
         Module moduleComponent = PhotonNetwork.InstantiateRoomObject(prefabName, position, rotation).GetComponent<Module>();
-        if (moduleComponent != null)
-        {
-            moduleComponent.Info = currentModule;
-            moduleComponent.Initialize(PhotonNetwork.LocalPlayer.UserId);
-            moduleComponent.AutoSetColor();
-        }
+        moduleComponent.Info = currentModule;
+        moduleComponent.Initialize(userId);
     }
 
     private void UpdateDestroyMode()
@@ -161,6 +157,7 @@ public class BuildSystem : MonoBehaviour
         }
 
         PhotonNetwork.Destroy(moduleObject);
+        AvtoColors.Instance.AutoColor();
     }
 
     private void PayForBuilding(ModuleInfo module)

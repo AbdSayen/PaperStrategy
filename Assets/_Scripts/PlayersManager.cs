@@ -42,10 +42,15 @@ public class PlayersManager : MonoBehaviourPun
         }
     }
 
-    //private void Update()
-    //{
-    //    print(Players.Count);
-    //}
+    private void Update()
+    {
+        //string output = string.Empty;
+        //for (int i = 0; i < Players.Count; i++)
+        //{
+        //    output += $"{Players[i].Color}\n";
+        //}
+        //DebugText.UpdateText(output);
+    }
 
     public void LocalRegisterPlayer()
     {

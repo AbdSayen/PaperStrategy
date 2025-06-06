@@ -37,8 +37,8 @@ public class GameInventory : MonoBehaviour
 
     private void GetStandartMaterials()
     {
-        Balance.SetCount(Materials.GOLD, 300);
-        Balance.SetCount(Materials.WOOD, 100);
+        Balance.SetCount(Materials.GOLD, 30000);
+        Balance.SetCount(Materials.WOOD, 10000);
         Balance.SetCount(Materials.OIL, 25);
         UpdateUI();
     }

@@ -49,6 +49,11 @@ MonoBehaviour:
   - SyncExistingPlayer
   - GlobalRegisterPlayer
   - InstantiateRoomObject
+  - InitializeModule
+  - InitializeRPC
+  - SyncModuleRPC
+  - SyncDisplayImageColorRPC
+  - SyncOwnerRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 0

@@ -31,6 +31,6 @@ public class BaseSpawner : MonoBehaviour
             .GetComponent<Module>();
 
         _base.OwnerId = player.GlobalId;
-        _base.AutoSetColor();
+        _base.Initialize(player.GlobalId);
     }
 }
