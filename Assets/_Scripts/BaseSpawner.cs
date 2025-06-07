@@ -30,7 +30,6 @@ public class BaseSpawner : MonoBehaviour
         Module _base = PhotonNetwork.Instantiate(basePrefab.name, basesSpawnPoints[player.LocalId], Quaternion.identity)
             .GetComponent<Module>();
 
-        _base.OwnerId = player.GlobalId;
-        _base.Initialize(player.GlobalId);
+        _base.Initialize(player.GlobalId, "Base");
     }
 }

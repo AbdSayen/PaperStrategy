@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 861dc58b19f531a4bb8829b0ae649ff9, type: 3}
-  m_Name: Base
+  m_Name: TitaniumSource
   m_EditorClassIdentifier: 
-  moduleName: Titanium
+  moduleName: Titanium Source
   description: 
-  maxHealth: 100
+  maxHealth: -1
   size: {x: 2, y: 2}
   moneyCost: 0
-  goldCost: 25
-  woodCost: 50
+  goldCost: 0
+  woodCost: 0
   oilCost: 0
   uranusCost: 0
   titaniumCost: 0
-  sprite: {fileID: -6937154614026109424, guid: 8a304b4589aa9cf498b9be2e9686c96a, type: 3}
+  sprite: {fileID: -743737147, guid: 917a86817b373ca4caee588812da5111, type: 3}
   prefab: {fileID: 1154115400724727612, guid: 8a126b5bdd781134c89f59c88dbf578a, type: 3}

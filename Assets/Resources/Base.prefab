@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -6937154614026109424, guid: 8a304b4589aa9cf498b9be2e9686c96a, type: 3}
-  m_Color: {r: 0, g: 0.19607878, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -166,7 +166,8 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 5983692388398327874}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0

@@ -19,7 +19,7 @@ public class BuildSystem : MonoBehaviour
     private PostProcessVolume volume;
     private bool isBuildMode = false;
     private bool isDestroyMode = false;
-    private ModuleInfo currentModule;
+    private ModuleInfo currentModuleInfo;
     private GameObject previewObject;
     private SpriteRenderer previewRenderer;
     private Collider2D previewCollider;
@@ -38,7 +38,7 @@ public class BuildSystem : MonoBehaviour
 
     private void Update()
     {
-        if (isBuildMode && currentModule != null)
+        if (isBuildMode && currentModuleInfo != null)
         {
             UpdateBuildMode();
         }
@@ -60,7 +60,7 @@ public class BuildSystem : MonoBehaviour
         previewObject.transform.position = gridPosition;
 
         bool canPlace = CheckPlacementValid();
-        UpdatePreviewColor(canPlace && EnoughMaterials(currentModule));
+        UpdatePreviewColor(canPlace && EnoughMaterials(currentModuleInfo));
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -68,7 +68,7 @@ public class BuildSystem : MonoBehaviour
             mouseDownTime = Time.time;
         }
 
-        if (Input.GetMouseButtonUp(0) && !IsPointerOverBlockingUI() && EnoughMaterials(currentModule))
+        if (Input.GetMouseButtonUp(0) && !IsPointerOverBlockingUI() && EnoughMaterials(currentModuleInfo))
         {
             float mouseMoveDistance = Vector3.Distance(mouseDownPosition, Input.mousePosition);
             float clickDuration = Time.time - mouseDownTime;
@@ -77,8 +77,23 @@ public class BuildSystem : MonoBehaviour
             {
                 if (canPlace)
                 {
-                    photonView.RPC("InstantiateRoomObject", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.UserId, currentModule.prefab.name, gridPosition, Quaternion.identity);
-                    PayForBuilding(currentModule);
+                    GameObject localObj = Instantiate(
+                        currentModuleInfo.prefab,
+                        gridPosition,
+                        Quaternion.identity
+                    );
+
+                    localObj.GetComponent<Module>().SetColor(
+                        PlayersManager.Instance.GetPlayerData(PhotonNetwork.LocalPlayer.UserId).Color);
+
+                    photonView.RPC("InstantiateRoomObject", RpcTarget.MasterClient, 
+                        PhotonNetwork.LocalPlayer.UserId, 
+                        currentModuleInfo.prefab.name, 
+                        gridPosition, 
+                        currentModuleInfo.name);
+                    PayForBuilding(currentModuleInfo);
+
+                    Destroy(localObj, 1f);
                 }
                 else
                     CameraEffects.Instance.ShakeCamera(0.075f, 0.2f);
@@ -87,11 +102,11 @@ public class BuildSystem : MonoBehaviour
     }
 
     [PunRPC]
-    private void InstantiateRoomObject(string userId, string prefabName, Vector3 position, Quaternion rotation)
+    private void InstantiateRoomObject(string userId, string prefabName, Vector3 position, string moduleName)
     {
-        Module moduleComponent = PhotonNetwork.InstantiateRoomObject(prefabName, position, rotation).GetComponent<Module>();
-        moduleComponent.Info = currentModule;
-        moduleComponent.Initialize(userId);
+        Module moduleComponent = PhotonNetwork.InstantiateRoomObject(prefabName, position, Quaternion.identity).GetComponent<Module>();
+        moduleComponent.Info = currentModuleInfo;
+        moduleComponent.Initialize(userId, moduleName);
     }
 
     private void UpdateDestroyMode()
@@ -179,8 +194,9 @@ public class BuildSystem : MonoBehaviour
 
     private void CreatePreviewObject()
     {
-        previewObject = Instantiate(currentModule.prefab);
+        previewObject = Instantiate(currentModuleInfo.prefab);
         previewObject.GetComponent<SpriteRenderer>().sortingOrder = 10;
+        previewObject.GetComponent<Module>().Status = ModuleStatus.Building;
         previewRenderer = previewObject.GetComponent<SpriteRenderer>();
         previewCollider = previewObject.GetComponent<Collider2D>();
 
@@ -237,14 +253,14 @@ public class BuildSystem : MonoBehaviour
 
     public void ChooseModule(ModuleInfo module)
     {
-        if(currentModule == module)
+        if(currentModuleInfo == module)
         {
             CancelModuleSelection();
             return;
         }
         CancelModuleSelection();
         ModuleInfoPanel.Instance.gameObject.SetActive(true);
-        currentModule = module;
+        currentModuleInfo = module;
         ModuleInfoPanel.Instance.SetInfo(module, GameInventory.Balance);
     }
 
@@ -259,7 +275,7 @@ public class BuildSystem : MonoBehaviour
         }
 
         ModuleInfoPanel.Instance.gameObject.SetActive(false);
-        currentModule = null;
+        currentModuleInfo = null;
     }
 
     public void SwitchDestroyMode()

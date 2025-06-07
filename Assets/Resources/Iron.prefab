@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -901187590174343476, guid: ce5e4eac8dd0f4c4ca08592ff574bdf3, type: 3}
-  m_Color: {r: 0, g: 0.19607878, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -155,7 +155,8 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 4199351556547108562}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -248,7 +249,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -603249734, guid: 917a86817b373ca4caee588812da5111, type: 3}
-  m_Color: {r: 0, g: 0.19607845, b: 0.9960785, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

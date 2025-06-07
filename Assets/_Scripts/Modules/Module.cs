@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -6,69 +7,51 @@ public class Module : MonoBehaviourPun, IPunObservable
 {
     public ModuleInfo Info { get; set; }
     public float Health { get; private set; }
-    public string OwnerId { get; set; } = null;
+    public string OwnerId { get; set; }
+    public ModuleStatus Status { get; set; } = ModuleStatus.Inactive;
     public Color NormalColor { get; private set; } = new();
     public SpriteRenderer SpriteRenderer { get; private set; }
 
-    private bool _isInitialized;
-    private Coroutine _initCoroutine;
-
-    protected virtual void Awake()
+    protected virtual void Awake() 
     {
         SpriteRenderer = GetComponent<SpriteRenderer>();
-
-        // Принудительная проверка PhotonView
-        //if (photonView == null)
-        //    photonView = gameObject.AddComponent<PhotonView>();
     }
 
-    protected virtual void Start()
-    {
-        if (photonView.IsMine && OwnerId != null)
-        {
-            AutoSetColor();
-        }
-    }
-
-    private void OnEnable()
-    {
-        _initCoroutine = StartCoroutine(SubscribeWhenReady());
-    }
-
-    private void OnDisable()
-    {
-        if (_initCoroutine != null)
-            StopCoroutine(_initCoroutine);
-
-        if (PlayersManager.Instance != null)
-            PlayersManager.Instance.OnLocalReady -= AutoSetColor;
-    }
+    protected virtual void Start() { }
+    private void OnEnable() => StartCoroutine(SubscribeWhenReady());
 
     private IEnumerator SubscribeWhenReady()
     {
         while (PlayersManager.Instance == null)
             yield return null;
 
-        PlayersManager.Instance.OnLocalReady += AutoSetColor;
-        _isInitialized = true;
-
-        // Если OwnerId уже установлен, но цвет не обновлен
-        if (OwnerId != null)
+        if (photonView.ViewID != 0 && !photonView.IsMine && string.IsNullOrEmpty(OwnerId))
         {
-            AutoSetColor();
-            photonView.RPC("SyncModuleRPC", RpcTarget.Others, OwnerId, NormalColor.r, NormalColor.g, NormalColor.b);
+            photonView.RPC("RequestSyncRPC", RpcTarget.MasterClient);
+        }
+
+        UpdateColor();
+    }
+
+    [PunRPC]
+    private void RequestSyncRPC()
+    {
+        print(2);
+        if (photonView.IsMine)
+        {
+            print(3);
+            photonView.RPC("InitializeRPC", RpcTarget.OthersBuffered, OwnerId);
         }
     }
 
     [PunRPC]
-    private void SyncModuleRPC(string ownerId, float r, float g, float b)
+    private void InitializeRPC(string ownerId)
     {
-        OwnerId = ownerId;
-        NormalColor = new Color(r, g, b);
-        SpriteRenderer.color = NormalColor;
+        print(4);
+        Initialize(ownerId, Info.moduleName);
     }
 
-    protected void SetColor(Color color)
+    public virtual void SetColor(Color color)
     {
         SpriteRenderer.color = color;
     }
@@ -79,41 +62,27 @@ public class Module : MonoBehaviourPun, IPunObservable
         if (apply) NormalizeColor();
     }
 
-    public virtual void AutoSetColor()
+    public void UpdateColor()
     {
-        Color targetColor = OwnerId != null
+        if (PlayersManager.Instance is null) return;
+
+        SetNormalColor(
+            OwnerId is not null && PlayersManager.Instance.GetPlayerData(OwnerId) is not null
             ? PlayersManager.Instance.GetPlayerData(OwnerId).Color
-            : Color.black;
-
-        SetNormalColor(targetColor, true);
-
-        if (_isInitialized && photonView.IsMine)
-        {
-            photonView.RPC("SyncModuleRPC", RpcTarget.Others,
-                OwnerId,
-                NormalColor.r,
-                NormalColor.g,
-                NormalColor.b);
-        }
+            : Color.black, true);
     }
 
-    public void Initialize(string ownerId)
+    public void Initialize(string ownerId, string moduleName)
     {
-        OwnerId = ownerId;
-        if (Info != null) Health = Info.maxHealth;
+        string path = "ModulesData/" + moduleName;
+        Info = Resources.Load<ModuleInfo>(path);
 
-        if (photonView.IsMine)
-        {
-            photonView.RPC("InitializeRPC", RpcTarget.AllBuffered, ownerId);
-        }
-    }
-
-    [PunRPC]
-    private void InitializeRPC(string ownerId)
-    {
+        Status = ModuleStatus.Active;
         OwnerId = ownerId;
-        if (Info != null) Health = Info.maxHealth;
-        AutoSetColor();
+        UpdateColor();
+
+        if (Info == null) return;
+        Health = Info.maxHealth;
     }
 
     public void NormalizeColor()
@@ -121,41 +90,38 @@ public class Module : MonoBehaviourPun, IPunObservable
         SetColor(NormalColor);
     }
 
-    public void TakeDamage(int damage)
-    {
-        Health = Mathf.Max(0, Health - damage);
-        if (Health <= 0) OnDestroyed();
-    }
+    public void TakeDamage(int damage) => Health = Mathf.Max(0, Health - damage);
+    public void Repair(int amount) => Health = Mathf.Min((int)Info.maxHealth, Health + amount);
 
-    public void Repair(int amount)
-    {
-        if (Info != null)
-            Health = Mathf.Min(Info.maxHealth, Health + amount);
-    }
+    protected virtual void OnBuilt() { }
+    protected virtual void OnDestroyed() { }
 
     public virtual void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
             stream.SendNext(Health);
-            stream.SendNext(OwnerId ?? "");
-            stream.SendNext(NormalColor.r);
-            stream.SendNext(NormalColor.g);
-            stream.SendNext(NormalColor.b);
+            stream.SendNext(OwnerId);
+            stream.SendNext((int)Status);
+            stream.SendNext(Info?.moduleName ?? "");
         }
         else
         {
             Health = (float)stream.ReceiveNext();
             OwnerId = (string)stream.ReceiveNext();
-            float r = (float)stream.ReceiveNext();
-            float g = (float)stream.ReceiveNext();
-            float b = (float)stream.ReceiveNext();
+            Status = (ModuleStatus)(int)stream.ReceiveNext();
 
-            NormalColor = new Color(r, g, b);
-            SpriteRenderer.color = NormalColor;
+            string moduleName = (string)stream.ReceiveNext();
+            if (Info == null && !string.IsNullOrEmpty(moduleName))
+                Initialize(OwnerId, moduleName);
         }
     }
 
-    protected virtual void OnBuilt() { }
-    protected virtual void OnDestroyed() { }
+}
+
+public enum ModuleStatus 
+{ 
+    Inactive = 0,
+    Building = 1,
+    Active = 2,
 }
